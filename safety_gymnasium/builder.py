@@ -99,6 +99,8 @@ class Builder(gymnasium.Env, gymnasium.utils.EzPickle):
         height: int = 256,
         camera_id: int | None = None,
         camera_name: str | None = None,
+        early_termination: bool = False,
+        term_cost: int | None = None,
     ) -> None:
         """Initialize the builder.
 
@@ -134,6 +136,11 @@ class Builder(gymnasium.Env, gymnasium.utils.EzPickle):
         self.cost: float = None
         self.terminated: bool = True
         self.truncated: bool = False
+
+        self.cum_cost: float = 0
+
+        self.early_termination = early_termination
+        self.term_cost = term_cost
 
         self.render_parameters = RenderConf(render_mode, width, height, camera_id, camera_name)
 
@@ -182,6 +189,7 @@ class Builder(gymnasium.Env, gymnasium.utils.EzPickle):
         self.task.agent.reset()
 
         cost = self._cost()
+        self.cum_cost = 0 
         assert cost['cost_sum'] == 0, f'World has starting cost! {cost}'
         # Reset stateful parts of the environment
         self.first_reset = False  # Built our first world successfully
@@ -212,6 +220,11 @@ class Builder(gymnasium.Env, gymnasium.utils.EzPickle):
             info.update(self._cost())
 
             cost = info['cost_sum']
+
+            self.cum_cost += cost 
+            if self.early_termination:
+                if self.cum_cost >= self.term_cost:
+                    self.terminated = True
 
             self.task.specific_step()
 
