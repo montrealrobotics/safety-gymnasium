@@ -99,8 +99,9 @@ class Builder(gymnasium.Env, gymnasium.utils.EzPickle):
         height: int = 256,
         camera_id: int | None = None,
         camera_name: str | None = None,
-        early_termination: bool = False,
-        term_cost: int | None = None,
+        early_termination: bool = True,
+        term_cost: int = 1,
+        failure_penalty: float = 0.0,
     ) -> None:
         """Initialize the builder.
 
@@ -141,6 +142,7 @@ class Builder(gymnasium.Env, gymnasium.utils.EzPickle):
 
         self.early_termination = early_termination
         self.term_cost = term_cost
+        self.failure_penalty = failure_penalty 
 
         self.render_parameters = RenderConf(render_mode, width, height, camera_id, camera_name)
 
@@ -225,6 +227,7 @@ class Builder(gymnasium.Env, gymnasium.utils.EzPickle):
             if self.early_termination:
                 if self.cum_cost >= self.term_cost:
                     self.terminated = True
+                    reward -= self.failure_penalty 
 
             self.task.specific_step()
 
