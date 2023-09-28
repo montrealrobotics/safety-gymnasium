@@ -42,3 +42,4 @@ from safety_gymnasium.tasks.safe_vision.fading.fading_level2 import (
 from safety_gymnasium.tasks.safe_vision.race.race_level0 import RaceLevel0
 from safety_gymnasium.tasks.safe_vision.race.race_level1 import RaceLevel1
 from safety_gymnasium.tasks.safe_vision.race.race_level2 import RaceLevel2
+from safety_gymnasium.tasks.safe_navigation.general.general_level0 import GeneralLevel0

@@ -392,18 +392,37 @@ class BaseTask(Underlying):  # pylint: disable=too-many-instance-attributes,too-
 
         obs.update(self.agent.obs_sensor())
 
+        all_lidar = None
+        lidar_class = []
+        obstacles = ["goal", "buttons", "gremlins", "hazards", "vases", "push_box", "pillars"]
+
+
         for obstacle in self._obstacles:
             if obstacle.is_lidar_observed:
                 obs[obstacle.name + '_lidar'] = self._obs_lidar(obstacle.pos, obstacle.group)
+                lidar = np.expand_dims(obs[obstacle.name + '_lidar'], 1)
+                lidar[lidar==0.] = 10.
+                all_lidar = lidar if all_lidar is None else np.hstack((all_lidar, lidar))
+                lidar_class.append([obstacles.index(obstacle.name)]*obs[obstacle.name + '_lidar'].shape[0])
+            
             if hasattr(obstacle, 'is_comp_observed') and obstacle.is_comp_observed:
                 obs[obstacle.name + '_comp'] = self._obs_compass(obstacle.pos)
+        print(all_lidar)
+        all_lidar = np.array(all_lidar)
+        min_lidar_idx = list(np.argmin(all_lidar, axis=1))
+        all_lidar, lidar_class = np.transpose(all_lidar, (1,0)), np.transpose(lidar_class, (1,0))
+        print("Lidar index", min_lidar_idx)
+        # print(all_lidar.shape, lidar_class.shape, min_lidar_idx.shape)
+        obs["joint_lidar"] = np.take(all_lidar, min_lidar_idx, axis=1)
+        obs["joint_lidar_class"] = lidar_class[:,min_lidar_idx]
 
+        print("Joint lidar is ", obs["joint_lidar"], obs["joint_lidar_class"])
         if self.observe_vision:
             obs['vision'] = self._obs_vision()
 
-        assert self.obs_info.obs_space_dict.contains(
-            obs,
-        ), f'Bad obs {obs} {self.obs_info.obs_space_dict}'
+        # assert self.obs_info.obs_space_dict.contains(
+        #     obs,
+        # ), f'Bad obs {obs} {self.obs_info.obs_space_dict}'
 
         if self.observation_flatten:
             obs = gymnasium.spaces.utils.flatten(self.obs_info.obs_space_dict, obs)

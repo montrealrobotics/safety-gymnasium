@@ -116,6 +116,13 @@ def __combine(tasks, agents, max_episode_steps):
 
 # Button Environments
 # ----------------------------------------
+general_tasks = {'General0': {}}
+__combine(general_tasks, robots, max_episode_steps=1000)
+
+
+
+# Button Environments
+# ----------------------------------------
 button_tasks = {'Button0': {}, 'Button1': {}, 'Button2': {}}
 __combine(button_tasks, robots, max_episode_steps=1000)
 
