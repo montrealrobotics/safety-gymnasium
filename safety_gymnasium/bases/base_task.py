@@ -408,13 +408,22 @@ class BaseTask(Underlying):  # pylint: disable=too-many-instance-attributes,too-
             if hasattr(obstacle, 'is_comp_observed') and obstacle.is_comp_observed:
                 obs[obstacle.name + '_comp'] = self._obs_compass(obstacle.pos)
         print(all_lidar)
-        all_lidar = np.array(all_lidar)
-        min_lidar_idx = list(np.argmin(all_lidar, axis=1))
-        all_lidar, lidar_class = np.transpose(all_lidar, (1,0)), np.transpose(lidar_class, (1,0))
+        all_lidar, lidar_class = np.array(all_lidar), np.transpose(np.array(lidar_class), (1,0))
+        print(all_lidar.shape, lidar_class.shape)
+        min_lidar_idx = np.argmin(all_lidar, axis=1)
+        #min_lidar_idx = np.hstack((np.expand_dims(range(len(min_lidar_idx)), 1), np.expand_dims(min_lidar_idx, 1)))
+        print(min_lidar_idx)
+        min_lidar_idx += np.array(list(range(0, np.array(all_lidar.shape).prod(), all_lidar.shape[1])))
+        print(min_lidar_idx)
+        #all_lidar, lidar_class = np.transpose(all_lidar, (1,0)), np.transpose(lidar_class, (1,0))
+#        lidar_bool = np.zeros_like(all_lidar).astype(np.bool)
+#        lidar_bool[min_lidar_idx] = True
         print("Lidar index", min_lidar_idx)
         # print(all_lidar.shape, lidar_class.shape, min_lidar_idx.shape)
-        obs["joint_lidar"] = np.take(all_lidar, min_lidar_idx, axis=1)
-        obs["joint_lidar_class"] = lidar_class[:,min_lidar_idx]
+        print(np.take(all_lidar, min_lidar_idx))
+
+        obs["joint_lidar"] = np.take(all_lidar, min_lidar_idx)
+        obs["joint_lidar_class"] = np.take(lidar_class, min_lidar_idx)
 
         print("Joint lidar is ", obs["joint_lidar"], obs["joint_lidar_class"])
         if self.observe_vision:
