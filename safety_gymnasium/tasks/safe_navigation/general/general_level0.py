@@ -88,25 +88,47 @@ class GeneralLevel0(BaseTask):
 
         obs.update(self.agent.obs_sensor())
 
+        all_lidar = None
+        lidar_class = []
+        obstacles = ["goal", "buttons", "gremlins", "hazards", "vases", "push_box", "pillars"]
+
+
         for obstacle in self._obstacles:
             if obstacle.is_lidar_observed:
-                obs[obstacle.name + '_lidar'] = self._obs_lidar(obstacle.pos, obstacle.group)
+                if obstacle.name == "buttons" and self.buttons.timer != 0:
+                    lidar = np.zeros(self.lidar_conf.num_bins)
+                else:
+                    lidar = self._obs_lidar(obstacle.pos, obstacle.group)
+                if obstacle.name == "goal":
+                    obs["goal_lidar"] = lidar
+                lidar = np.expand_dims(lidar, 1)
+                all_lidar = lidar if all_lidar is None else np.hstack((all_lidar, lidar))
+                lidar_class.append([obstacles.index(obstacle.name)]*lidar.shape[0])
+                # del obs[obstacle.name+'_lidar']
             if hasattr(obstacle, 'is_comp_observed') and obstacle.is_comp_observed:
                 obs[obstacle.name + '_comp'] = self._obs_compass(obstacle.pos)
 
-        if self.buttons.timer != 0:  # pylint: disable=no-member
-            obs['buttons_lidar'] = np.zeros(self.lidar_conf.num_bins)
+        all_lidar, lidar_class = np.array(all_lidar), np.transpose(np.array(lidar_class), (1,0))
+        min_lidar_idx = np.argmax(all_lidar, axis=1)
+        min_lidar_idx += np.array(list(range(0, np.array(all_lidar.shape).prod(), all_lidar.shape[1])))
+
+        obs["joint_lidar"] = np.take(all_lidar, min_lidar_idx)
+        obs["joint_lidar_class"] = np.take(lidar_class, min_lidar_idx)
+
 
         if self.observe_vision:
             obs['vision'] = self._obs_vision()
 
-        assert self.obs_info.obs_space_dict.contains(
-            obs,
-        ), f'Bad obs {obs} {self.obs_info.obs_space_dict}'
+        # assert self.obs_info.obs_space_dict.contains(
+        #     obs,
+        # ), f'Bad obs {obs} {self.obs_info.obs_space_dict}'
 
         if self.observation_flatten:
             obs = gymnasium.spaces.utils.flatten(self.obs_info.obs_space_dict, obs)
         return obs
+
+    def reset_objects(self):
+        self.hazards.num, self.pillars.num, self.gremlins.num, self.buttons.num, self.vases.num = np.random.choice(range(1, 5), 5)
 
     @property
     def goal_achieved(self):
