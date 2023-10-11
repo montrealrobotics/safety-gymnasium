@@ -26,12 +26,12 @@ from safety_gymnasium.bases.base_task import BaseTask
 class ButtonLevel0(BaseTask):
     """An agent must press a goal button."""
 
-    def __init__(self, config) -> None:
+    def __init__(self, config, reward_goal=1.) -> None:
         super().__init__(config=config)
 
         self.placements_conf.extents = [-1, -1, 1, 1]
 
-        self._add_geoms(Buttons(num=4, is_constrained=False))
+        self._add_geoms(Buttons(num=4, is_constrained=False, reward_goal=reward_goal))
         self._add_geoms(Goal(size=self.buttons.size * 2, alpha=0.1))  # pylint: disable=no-member
 
         self.last_dist_goal = None
@@ -45,6 +45,7 @@ class ButtonLevel0(BaseTask):
         self.last_dist_goal = dist_goal
 
         if self.goal_achieved:
+            print("Goal Achieved", self.buttons.reward_goal)
             reward += self.buttons.reward_goal  # pylint: disable=no-member
 
         return reward

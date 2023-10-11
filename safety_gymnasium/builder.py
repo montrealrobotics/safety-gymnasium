@@ -102,6 +102,7 @@ class Builder(gymnasium.Env, gymnasium.utils.EzPickle):
         early_termination: bool = True,
         term_cost: int = 1,
         failure_penalty: float = 0.0,
+        reward_goal: float = 1.0,
     ) -> None:
         """Initialize the builder.
 
@@ -130,7 +131,7 @@ class Builder(gymnasium.Env, gymnasium.utils.EzPickle):
         self.task_id: str = task_id
         self.config: dict = config
         self._seed: int = None
-        self._setup_simulation()
+        self._setup_simulation(reward_goal=reward_goal)
 
         self.first_reset: bool = None
         self.steps: int = None
@@ -143,20 +144,22 @@ class Builder(gymnasium.Env, gymnasium.utils.EzPickle):
         self.early_termination = early_termination
         self.term_cost = term_cost
         self.failure_penalty = failure_penalty 
+        self.reward_goal = reward_goal
 
         self.render_parameters = RenderConf(render_mode, width, height, camera_id, camera_name)
 
-    def _setup_simulation(self) -> None:
+    def _setup_simulation(self, reward_goal) -> None:
         """Set up mujoco the simulation instance."""
-        self.task = self._get_task()
+        self.task = self._get_task(reward_goal)
+        # self.task.reward_goal = self.reward_goal
         self.set_seed()
 
-    def _get_task(self) -> BaseTask:
+    def _get_task(self, reward_goal) -> BaseTask:
         """Instantiate a task object."""
         class_name = get_task_class_name(self.task_id)
         assert hasattr(tasks, class_name), f'Task={class_name} not implemented.'
         task_class = getattr(tasks, class_name)
-        task = task_class(config=self.config)
+        task = task_class(config=self.config, reward_goal=reward_goal)
 
         task.build_observation_space()
         return task

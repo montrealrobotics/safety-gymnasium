@@ -187,7 +187,7 @@ class Underlying(abc.ABC):  # pylint: disable=too-many-instance-attributes
     - :attr:`_obstacles` (list): All types of object in current environment.
     """
 
-    def __init__(self, config: dict | None = None) -> None:
+    def __init__(self, config: dict | None = None, reward_goal=1.0) -> None:
         """Initialize the engine.
 
         Args:
@@ -208,6 +208,7 @@ class Underlying(abc.ABC):  # pylint: disable=too-many-instance-attributes
 
         self.viewer = None
         self._viewers = {}
+        self.reward_goal = reward_goal
 
         # Obstacles which are added in environments.
         self._geoms = {}

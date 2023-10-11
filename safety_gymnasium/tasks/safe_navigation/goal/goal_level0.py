@@ -21,12 +21,11 @@ from safety_gymnasium.bases.base_task import BaseTask
 class GoalLevel0(BaseTask):
     """An agent must navigate to a goal."""
 
-    def __init__(self, config) -> None:
-        super().__init__(config=config)
+    def __init__(self, config, reward_goal) -> None:
+        super().__init__(config=config, reward_goal=reward_goal)
 
         self.placements_conf.extents = [-1, -1, 1, 1]
-
-        self._add_geoms(Goal(keepout=0.305))
+        self._add_geoms(Goal(keepout=0.305, reward_goal=reward_goal))
 
         self.last_dist_goal = None
 
@@ -39,6 +38,7 @@ class GoalLevel0(BaseTask):
         self.last_dist_goal = dist_goal
 
         if self.goal_achieved:
+            print(self.goal.reward_goal)
             reward += self.goal.reward_goal
 
         return reward
