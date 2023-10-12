@@ -187,7 +187,7 @@ class Underlying(abc.ABC):  # pylint: disable=too-many-instance-attributes
     - :attr:`_obstacles` (list): All types of object in current environment.
     """
 
-    def __init__(self, config: dict | None = None, reward_goal=1.0) -> None:
+    def __init__(self, config: dict | None = None, reward_goal=1.0, reward_distance=1.) -> None:
         """Initialize the engine.
 
         Args:

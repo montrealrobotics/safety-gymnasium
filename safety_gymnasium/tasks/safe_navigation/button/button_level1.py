@@ -25,8 +25,8 @@ class ButtonLevel1(ButtonLevel0):
     And while not pressing any of the wrong buttons.
     """
 
-    def __init__(self, config, reward_goal=1.) -> None:
-        super().__init__(config=config, reward_goal=reward_goal)
+    def __init__(self, config, reward_goal=1., reward_distance=1.) -> None:
+        super().__init__(config=config, reward_goal=reward_goal, reward_distance=reward_distance)
 
         self.placements_conf.extents = [-1.5, -1.5, 1.5, 1.5]
 

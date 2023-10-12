@@ -169,7 +169,7 @@ class BaseTask(Underlying):  # pylint: disable=too-many-instance-attributes,too-
       and it is implemented in different task.
     """
 
-    def __init__(self, config: dict, reward_goal=1.) -> None:  # pylint: disable-next=too-many-statements
+    def __init__(self, config: dict, reward_goal=1., reward_distance=1.) -> None:  # pylint: disable-next=too-many-statements
         """Initialize the task.
 
         Args:

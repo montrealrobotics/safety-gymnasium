@@ -20,8 +20,8 @@ from safety_gymnasium.tasks.safe_navigation.push.push_level1 import PushLevel1
 class PushLevel2(PushLevel1):
     """An agent must push a box to a goal while avoiding more hazards and pillars."""
 
-    def __init__(self, config) -> None:
-        super().__init__(config=config)
+    def __init__(self, config, reward_goal, reward_distance) -> None:
+        super().__init__(config=config, reward_goal=reward_goal, reward_distance=reward_distance)
         # pylint: disable=no-member
 
         self.placements_conf.extents = [-2, -2, 2, 2]
