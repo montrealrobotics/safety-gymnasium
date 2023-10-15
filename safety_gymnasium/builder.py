@@ -234,6 +234,7 @@ class Builder(gymnasium.Env, gymnasium.utils.EzPickle):
                     reward -= self.failure_penalty 
 
             self.task.specific_step()
+            info['goal_met'] = False
 
             # Goal processing
             if self.task.goal_achieved:
