@@ -141,6 +141,7 @@ class Builder(gymnasium.Env, gymnasium.utils.EzPickle):
         self.truncated: bool = False
 
         self.cum_cost: float = 0
+        self.total_goal_met: float = 0
 
         self.early_termination = early_termination
         self.term_cost = term_cost
@@ -199,6 +200,7 @@ class Builder(gymnasium.Env, gymnasium.utils.EzPickle):
         assert cost['cost_sum'] == 0, f'World has starting cost! {cost}'
         # Reset stateful parts of the environment
         self.first_reset = False  # Built our first world successfully
+        self.total_goal_met = 0
 
         # Return an observation
         return (self.task.obs(), info)
@@ -255,7 +257,8 @@ class Builder(gymnasium.Env, gymnasium.utils.EzPickle):
                         self.task.update_world()
                 else:
                     self.terminated = True
-
+            self.total_goal_met += int(info["goal_met"])
+            info["cum_goal_met"] = self.total_goal_met
         # termination of death processing
         if not self.task.agent.is_alive():
             self.terminated = True
