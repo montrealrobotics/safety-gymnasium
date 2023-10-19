@@ -117,26 +117,26 @@ def __combine(tasks, agents, max_episode_steps):
 # Button Environments
 # ----------------------------------------
 general_tasks = {'General0': {}}
-__combine(general_tasks, robots, max_episode_steps=1000)
+__combine(general_tasks, robots, max_episode_steps=10000)
 
 
 
 # Button Environments
 # ----------------------------------------
 button_tasks = {'Button0': {}, 'Button1': {}, 'Button2': {}}
-__combine(button_tasks, robots, max_episode_steps=1000)
+__combine(button_tasks, robots, max_episode_steps=10000)
 
 
 # Push Environments
 # ----------------------------------------
 push_tasks = {'Push0': {}, 'Push1': {}, 'Push2': {}}
-__combine(push_tasks, robots, max_episode_steps=1000)
+__combine(push_tasks, robots, max_episode_steps=10000)
 
 
 # Goal Environments
 # ----------------------------------------
 goal_tasks = {'Goal0': {}, 'Goal1': {}, 'Goal2': {}}
-__combine(goal_tasks, robots, max_episode_steps=1000)
+__combine(goal_tasks, robots, max_episode_steps=10000)
 
 
 # Circle Environments
