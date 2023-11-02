@@ -30,7 +30,7 @@ class PushLevel0(BaseTask):
         self.placements_conf.extents = [-1, -1, 1, 1]
 
         self._add_geoms(Goal(reward_goal=reward_goal))
-        self._add_free_geoms(PushBox(null_dist=0, reward_box_dist=reward_distance))
+        self._add_free_geoms(PushBox(null_dist=0, reward_box_goal=reward_distance))
 
         self.last_dist_box = None
         self.last_box_goal = None
