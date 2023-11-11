@@ -45,7 +45,6 @@ class ButtonLevel0(BaseTask):
         self.last_dist_goal = dist_goal
 
         if self.goal_achieved:
-            print("Goal Achieved", self.buttons.reward_goal)
             reward += self.buttons.reward_goal  # pylint: disable=no-member
 
         return reward

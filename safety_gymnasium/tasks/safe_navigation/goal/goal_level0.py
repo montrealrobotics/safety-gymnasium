@@ -39,7 +39,6 @@ class GoalLevel0(BaseTask):
         self.last_dist_goal = dist_goal
 
         if self.goal_achieved:
-            print(self.goal.reward_goal)
             reward += self.goal.reward_goal
 
         return reward
