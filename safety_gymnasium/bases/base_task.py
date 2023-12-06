@@ -239,6 +239,13 @@ class BaseTask(Underlying):  # pylint: disable=too-many-instance-attributes,too-
                 #     (self.lidar_conf.num_bins,),
                 #     dtype=np.float64,
                 # )
+            # if obstacle.is_lidar_observed and obstacle.name in ["goal", "push_box"]:
+            #     obs_space_dict[obstacle.name+"_lidar"] = gymnasium.spaces.Box(
+            #                 0.0,
+            #                 1.0,
+            #                 (self.lidar_conf.num_bins,),
+            #                 dtype=np.float64,
+            #             )
             if hasattr(obstacle, 'is_comp_observed') and obstacle.is_comp_observed:
                 name = obstacle.name + '_' + 'comp'
                 obs_space_dict[name] = gymnasium.spaces.Box(
@@ -264,12 +271,7 @@ class BaseTask(Underlying):  # pylint: disable=too-many-instance-attributes,too-
                     (self.lidar_conf.num_bins,),
                     dtype=np.float64,
                 )
-        obs_space_dict["goal_lidar"] = gymnasium.spaces.Box(
-                    0.0,
-                    1.0,
-                    (self.lidar_conf.num_bins,),
-                    dtype=np.float64,
-                )
+
 
         obs_space_dict["joint_lidar_class"] = gymnasium.spaces.Box(
                 0,
@@ -277,6 +279,22 @@ class BaseTask(Underlying):  # pylint: disable=too-many-instance-attributes,too-
                 (self.lidar_conf.num_bins, ),
                 dtype=np.uint8,
             )
+        for obstacle in self._obstacles:
+            # if obstacle.is_lidar_observed:
+                # name = obstacle.name + '_' + 'lidar'
+                # obs_space_dict[name] = gymnasium.spaces.Box(
+                #     0.0,
+                #     1.0,
+                #     (self.lidar_conf.num_bins,),
+                #     dtype=np.float64,
+                # )
+            if obstacle.is_lidar_observed and obstacle.name in ["goal", "push_box"]:
+                obs_space_dict[obstacle.name+"_lidar"] = gymnasium.spaces.Box(
+                            0.0,
+                            1.0,
+                            (self.lidar_conf.num_bins,),
+                            dtype=np.float64,
+                        )
         self.obs_info.obs_space_dict = gymnasium.spaces.Dict(obs_space_dict)
 
         if self.observation_flatten:
@@ -418,8 +436,8 @@ class BaseTask(Underlying):  # pylint: disable=too-many-instance-attributes,too-
         for obstacle in self._obstacles:
             if obstacle.is_lidar_observed:
                 lidar = self._obs_lidar(obstacle.pos, obstacle.group)
-                if obstacle.name == "goal":
-                    obs["goal_lidar"] = lidar
+                if obstacle.name in ["goal", "push_box"]:
+                    obs[obstacle.name+"_lidar"] = lidar
                 lidar = np.expand_dims(lidar, 1)
                 all_lidar = lidar if all_lidar is None else np.hstack((all_lidar, lidar))
                 lidar_class.append([obstacles.index(obstacle.name)]*lidar.shape[0])

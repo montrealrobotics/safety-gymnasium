@@ -93,8 +93,8 @@ class ButtonLevel0(BaseTask):
                     lidar = np.zeros(self.lidar_conf.num_bins)
                 else:
                     lidar = self._obs_lidar(obstacle.pos, obstacle.group)
-                if obstacle.name == "goal":
-                    obs["goal_lidar"] = lidar
+                if obstacle.name in ["goal", "push_box"]:
+                    obs[obstacle.name+"_lidar"] = lidar
                 lidar = np.expand_dims(lidar, 1)
                 all_lidar = lidar if all_lidar is None else np.hstack((all_lidar, lidar))
                 lidar_class.append([obstacles.index(obstacle.name)]*lidar.shape[0])
