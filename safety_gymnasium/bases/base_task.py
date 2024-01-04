@@ -28,7 +28,7 @@ import yaml
 
 import safety_gymnasium
 from safety_gymnasium.bases.underlying import Underlying
-from safety_gymnasium.utils.common_utils import ResamplingError, camel_to_snake
+from safety_gymnasium.utils.common_utils import ResamplingError
 from safety_gymnasium.utils.task_utils import theta2vec
 
 
@@ -178,7 +178,6 @@ class BaseTask(Underlying):  # pylint: disable=too-many-instance-attributes,too-
         """
         super().__init__(config=config)
 
-        self.task_name: str
         self.num_steps = 1000  # Maximum number of environment steps in an episode
 
         self.lidar_conf = LidarConf()
@@ -199,11 +198,6 @@ class BaseTask(Underlying):  # pylint: disable=too-many-instance-attributes,too-
         """Return the distance from the agent to the goal XY position."""
         assert hasattr(self, 'goal'), 'Please make sure you have added goal into env.'
         return self.agent.dist_xy(self.goal.pos)  # pylint: disable=no-member
-
-    def dist_staged_goal(self) -> float:
-        """Return the distance from the agent to the goal XY position."""
-        assert hasattr(self, 'staged_goal'), 'Please make sure you have added goal into env.'
-        return self.agent.dist_xy(self.staged_goal.pos)  # pylint: disable=no-member
 
     def calculate_cost(self) -> dict:
         """Determine costs depending on the agent and obstacles."""
@@ -236,23 +230,37 @@ class BaseTask(Underlying):  # pylint: disable=too-many-instance-attributes,too-
 
         obs_space_dict.update(self.agent.build_sensor_observation_space())
 
-        for obstacle in self._obstacles:
-            if obstacle.is_lidar_observed:
-                name = obstacle.name + '_' + 'lidar'
-                obs_space_dict[name] = gymnasium.spaces.Box(
-                    0.0,
-                    1.0,
-                    (self.lidar_conf.num_bins,),
-                    dtype=np.float64,
-                )
-            if hasattr(obstacle, 'is_comp_observed') and obstacle.is_comp_observed:
-                name = obstacle.name + '_' + 'comp'
-                obs_space_dict[name] = gymnasium.spaces.Box(
-                    -1.0,
-                    1.0,
-                    (self.compass_conf.shape,),
-                    dtype=np.float64,
-                )
+        obstacles = ["goal", "buttons", "gremlins", "hazards", "vases", "push_box", "pillars"]
+        obs_obstacles = [obstacle.name for obstacle in self._obstacles]
+
+        for obstacle in obstacles:
+            try:
+                idx = obs_obstacles.index(obstacle)
+                obstacle = self._obstacles[idx]
+                if obstacle.is_lidar_observed:
+                    name = obstacle.name + '_' + 'lidar'
+                    obs_space_dict[name] = gymnasium.spaces.Box(
+                        0.0,
+                        1.0,
+                        (self.lidar_conf.num_bins,),
+                        dtype=np.float64,
+                    )
+                if hasattr(obstacle, 'is_comp_observed') and obstacle.is_comp_observed:
+                    name = obstacle.name + '_' + 'comp'
+                    obs_space_dict[name] = gymnasium.spaces.Box(
+                        -1.0,
+                        1.0,
+                        (self.compass_conf.shape,),
+                        dtype=np.float64,
+                    )
+            except:
+                obs_space_dict[obstacle+"_lidar"] = gymnasium.spaces.Box(
+                        0.0,
+                        1.0,
+                        (self.lidar_conf.num_bins,),
+                        dtype=np.float64,
+                    )
+
 
         if self.observe_vision:
             width, height = self.vision_env_conf.vision_size
@@ -305,9 +313,6 @@ class BaseTask(Underlying):  # pylint: disable=too-many-instance-attributes,too-
         else:
             world_config['agent_rot'] = float(self.agent.rot)
 
-        self.task_name = self.__class__.__name__.split('Level', maxsplit=1)[0]
-        world_config['task_name'] = self.task_name
-
         # process world config via different objects.
         world_config.update(
             {
@@ -331,8 +336,9 @@ class BaseTask(Underlying):  # pylint: disable=too-many-instance-attributes,too-
         And have no randomness.
         Some tasks may generate cost when contacting static geoms.
         """
-        config_name = camel_to_snake(self.task_name)
-        level = int(self.__class__.__name__.split('Level')[1])
+        env_info = self.__class__.__name__.split('Level')
+        config_name = env_info[0].lower()
+        level = int(env_info[1])
 
         # load all config of meshes in specific environment from .yaml file
         base_dir = os.path.dirname(safety_gymnasium.__file__)
@@ -344,11 +350,7 @@ class BaseTask(Underlying):  # pylint: disable=too-many-instance-attributes,too-
             for group in meshes_config[idx].values():
                 geoms_config.update(group)
                 for item in group.values():
-                    if 'geoms' in item:
-                        for geom in item['geoms']:
-                            self.static_geoms_names.add(geom['name'])
-                    else:
-                        self.static_geoms_names.add(item['name'])
+                    self.static_geoms_names.add(item['name'])
 
     def build_goal_position(self) -> None:
         """Build a new goal position, maybe with resampling due to hazards."""
@@ -365,21 +367,6 @@ class BaseTask(Underlying):  # pylint: disable=too-many-instance-attributes,too-
             'goal'
         ]
         self._set_goal(self.world_info.layout['goal'])
-        mujoco.mj_forward(self.model, self.data)  # pylint: disable=no-member
-
-    def build_staged_goal_position(self) -> None:
-        """Build a new goal position, maybe with resampling due to hazards."""
-        # Resample until goal is compatible with layout
-        if 'staged_goal' in self.world_info.layout:
-            del self.world_info.layout['staged_goal']
-        self.world_info.layout['staged_goal'] = np.array(
-            self.staged_goal.get_next_goal_xy(),  # pylint: disable=no-member
-        )
-        # Move goal geom to new layout position
-        self.world_info.world_config_dict['geoms']['staged_goal']['pos'][
-            :2
-        ] = self.world_info.layout['staged_goal']
-        self._set_goal(self.world_info.layout['staged_goal'], 'staged_goal')
         mujoco.mj_forward(self.model, self.data)  # pylint: disable=no-member
 
     def _placements_dict_from_object(self, object_name: dict) -> dict:
@@ -418,13 +405,20 @@ class BaseTask(Underlying):  # pylint: disable=too-many-instance-attributes,too-
         obs = {}
 
         obs.update(self.agent.obs_sensor())
+        obstacles = ["goal", "buttons", "gremlins", "hazards", "vases", "push_box", "pillars"]
+        obs_obstacles = [obstacle.name for obstacle in self._obstacles]
 
-        for obstacle in self._obstacles:
-            if obstacle.is_lidar_observed:
-                obs[obstacle.name + '_lidar'] = self._obs_lidar(obstacle.pos, obstacle.group)
-            if hasattr(obstacle, 'is_comp_observed') and obstacle.is_comp_observed:
-                obs[obstacle.name + '_comp'] = self._obs_compass(obstacle.pos)
-
+        for obstacle in obstacles:
+            try:
+                idx = obs_obstacles.index(obstacle)
+                obstacle = self._obstacles[idx]
+                if obstacle.is_lidar_observed:
+                    obs[obstacle.name + '_lidar'] = self._obs_lidar(obstacle.pos, obstacle.group)
+                if hasattr(obstacle, 'is_comp_observed') and obstacle.is_comp_observed:
+                    obs[obstacle.name + '_comp'] = self._obs_compass(obstacle.pos)
+            except:
+                obs[obstacle+"_lidar"] = np.zeros(self.lidar_conf.num_bins)
+                
         if self.observe_vision:
             obs['vision'] = self._obs_vision()
 
@@ -597,3 +591,4 @@ class BaseTask(Underlying):  # pylint: disable=too-many-instance-attributes,too-
     @abc.abstractmethod
     def goal_achieved(self) -> bool:
         """Check if task specific goal is achieved."""
+

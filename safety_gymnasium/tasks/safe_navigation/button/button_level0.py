@@ -81,12 +81,19 @@ class ButtonLevel0(BaseTask):
         obs = {}
 
         obs.update(self.agent.obs_sensor())
+        obstacles = ["goal", "buttons", "gremlins", "hazards", "vases", "push_box", "pillars"]
+        obs_obstacles = [obstacle.name for obstacle in self._obstacles]
 
-        for obstacle in self._obstacles:
-            if obstacle.is_lidar_observed:
-                obs[obstacle.name + '_lidar'] = self._obs_lidar(obstacle.pos, obstacle.group)
-            if hasattr(obstacle, 'is_comp_observed') and obstacle.is_comp_observed:
-                obs[obstacle.name + '_comp'] = self._obs_compass(obstacle.pos)
+        for obstacle in obstacles:
+            try:
+                idx = obs_obstacles.index(obstacle)
+                obstacle = self._obstacles[idx]
+                if obstacle.is_lidar_observed:
+                    obs[obstacle.name + '_lidar'] = self._obs_lidar(obstacle.pos, obstacle.group)
+                if hasattr(obstacle, 'is_comp_observed') and obstacle.is_comp_observed:
+                    obs[obstacle.name + '_comp'] = self._obs_compass(obstacle.pos)
+            except:
+                obs[obstacle+"_lidar"] = np.zeros(self.lidar_conf.num_bins)
 
         if self.buttons.timer != 0:  # pylint: disable=no-member
             obs['buttons_lidar'] = np.zeros(self.lidar_conf.num_bins)
@@ -114,3 +121,4 @@ class ButtonLevel0(BaseTask):
             ):
                 return True
         return False
+
