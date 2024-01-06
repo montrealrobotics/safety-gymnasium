@@ -187,7 +187,7 @@ class Underlying(abc.ABC):  # pylint: disable=too-many-instance-attributes
     - :attr:`_obstacles` (list): All types of object in current environment.
     """
 
-    def __init__(self, config: dict | None = None) -> None:
+    def __init__(self, config: dict | None = None, reward_goal=1.0, reward_distance=1.) -> None:
         """Initialize the engine.
 
         Args:
@@ -208,6 +208,7 @@ class Underlying(abc.ABC):  # pylint: disable=too-many-instance-attributes
 
         self.viewer = None
         self._viewers = {}
+        self.reward_goal = reward_goal
 
         # Obstacles which are added in environments.
         self._geoms = {}
@@ -366,7 +367,7 @@ class Underlying(abc.ABC):  # pylint: disable=too-many-instance-attributes
                 continue
             self.world_info.layout[k] = self.data.body(k).xpos[:2].copy()
 
-    def _set_goal(self, pos: np.ndarray, name='goal') -> None:
+    def _set_goal(self, pos: np.ndarray) -> None:
         """Set position of goal object in Mujoco instance.
 
         Note:
@@ -375,9 +376,9 @@ class Underlying(abc.ABC):  # pylint: disable=too-many-instance-attributes
             of task instance.
         """
         if pos.shape == (2,):
-            self.model.body(name).pos[:2] = pos[:2]
+            self.model.body('goal').pos[:2] = pos[:2]
         elif pos.shape == (3,):
-            self.model.body(name).pos[:3] = pos[:3]
+            self.model.body('goal').pos[:3] = pos[:3]
         else:
             raise NotImplementedError
 

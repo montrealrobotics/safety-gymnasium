@@ -99,6 +99,11 @@ class Builder(gymnasium.Env, gymnasium.utils.EzPickle):
         height: int = 256,
         camera_id: int | None = None,
         camera_name: str | None = None,
+        early_termination: bool = False,
+        term_cost: int = 1,
+        failure_penalty: float = 0.0,
+        reward_goal: float = 1.0,
+        reward_distance: float = 1.0,
     ) -> None:
         """Initialize the builder.
 
@@ -127,7 +132,7 @@ class Builder(gymnasium.Env, gymnasium.utils.EzPickle):
         self.task_id: str = task_id
         self.config: dict = config
         self._seed: int = None
-        self._setup_simulation()
+        self._setup_simulation(reward_goal=reward_goal, reward_distance=reward_distance)
 
         self.first_reset: bool = None
         self.steps: int = None
@@ -135,19 +140,28 @@ class Builder(gymnasium.Env, gymnasium.utils.EzPickle):
         self.terminated: bool = True
         self.truncated: bool = False
 
+        self.cum_cost: float = 0
+        self.total_goal_met: float = 0
+
+        self.early_termination = early_termination
+        self.term_cost = term_cost
+        self.failure_penalty = failure_penalty 
+        self.reward_goal = reward_goal
+
         self.render_parameters = RenderConf(render_mode, width, height, camera_id, camera_name)
 
-    def _setup_simulation(self) -> None:
+    def _setup_simulation(self, reward_goal, reward_distance) -> None:
         """Set up mujoco the simulation instance."""
-        self.task = self._get_task()
+        self.task = self._get_task(reward_goal, reward_distance)
+        # self.task.reward_goal = self.reward_goal
         self.set_seed()
 
-    def _get_task(self) -> BaseTask:
+    def _get_task(self, reward_goal, reward_distance) -> BaseTask:
         """Instantiate a task object."""
         class_name = get_task_class_name(self.task_id)
         assert hasattr(tasks, class_name), f'Task={class_name} not implemented.'
         task_class = getattr(tasks, class_name)
-        task = task_class(config=self.config)
+        task = task_class(config=self.config, reward_goal=reward_goal, reward_distance=reward_distance)
 
         task.build_observation_space()
         return task
@@ -177,14 +191,16 @@ class Builder(gymnasium.Env, gymnasium.utils.EzPickle):
         self.steps = 0  # Count of steps taken in this episode
 
         self.task.reset()
-        self.task.specific_reset()
         self.task.update_world()  # refresh specific settings
+        self.task.specific_reset()
         self.task.agent.reset()
 
         cost = self._cost()
+        self.cum_cost = 0 
         assert cost['cost_sum'] == 0, f'World has starting cost! {cost}'
         # Reset stateful parts of the environment
         self.first_reset = False  # Built our first world successfully
+        self.total_goal_met = 0
 
         # Return an observation
         return (self.task.obs(), info)
@@ -213,7 +229,14 @@ class Builder(gymnasium.Env, gymnasium.utils.EzPickle):
 
             cost = info['cost_sum']
 
+            self.cum_cost += cost 
+            if self.early_termination:
+                if self.cum_cost >= self.term_cost:
+                    self.terminated = True
+                    reward -= self.failure_penalty 
+
             self.task.specific_step()
+            info['goal_met'] = False
 
             # Goal processing
             if self.task.goal_achieved:
@@ -234,7 +257,8 @@ class Builder(gymnasium.Env, gymnasium.utils.EzPickle):
                         self.task.update_world()
                 else:
                     self.terminated = True
-
+            self.total_goal_met += int(info["goal_met"])
+            info["cum_goal_met"] = self.total_goal_met
         # termination of death processing
         if not self.task.agent.is_alive():
             self.terminated = True
