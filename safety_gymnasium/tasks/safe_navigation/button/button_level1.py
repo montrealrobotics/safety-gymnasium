@@ -14,8 +14,9 @@
 # ==============================================================================
 """Button task 1."""
 
-from safety_gymnasium.assets.geoms import Hazards
+from safety_gymnasium.assets.geoms import Hazards, Pillars
 from safety_gymnasium.assets.mocaps import Gremlins
+from safety_gymnasium.assets.free_geoms import Vases, PushBox
 from safety_gymnasium.tasks.safe_navigation.button.button_level0 import ButtonLevel0
 
 
@@ -31,5 +32,8 @@ class ButtonLevel1(ButtonLevel0):
         self.placements_conf.extents = [-1.5, -1.5, 1.5, 1.5]
 
         self._add_geoms(Hazards(num=4, keepout=0.18))
-        self._add_mocaps(Gremlins(num=4, travel=0.35, keepout=0.4))
+        # self._add_mocaps(Gremlins(num=2, travel=0.35, keepout=0.4))
+        self._add_free_geoms(Vases(num=1, is_constrained=False))
+        self._add_geoms(Pillars(num=1, is_constrained=False))
+        self._add_free_geoms(PushBox(null_dist=0))
         self.buttons.is_constrained = True  # pylint: disable=no-member

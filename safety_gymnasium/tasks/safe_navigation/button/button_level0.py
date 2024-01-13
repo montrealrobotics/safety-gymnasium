@@ -30,10 +30,10 @@ class ButtonLevel0(BaseTask):
 
     def __init__(self, config, reward_goal=1., reward_distance=1.) -> None:
         super().__init__(config=config)
+        self._add_geoms(Buttons(num=4, is_constrained=False, reward_goal=reward_goal, reward_distance=reward_distance))
 
         self.placements_conf.extents = [-1, -1, 1, 1]
 
-        self._add_geoms(Buttons(num=4, is_constrained=False, reward_goal=reward_goal, reward_distance=reward_distance))
         self._add_geoms(Goal(size=self.buttons.size * 2, alpha=0.1))  # pylint: disable=no-member
 
         self.last_dist_goal = None

@@ -81,9 +81,9 @@ class Buttons(Geom):  # pylint: disable=too-many-instance-attributes
 
     def cal_cost(self):
         """Contacts processing."""
-        assert (
-            self.goal_button is not None
-        ), 'Please make sure this method can get information about goal button.'
+        # assert (
+        #     self.goal_button is not None
+        # ), 'Please make sure this method can get information about goal button.'
         cost = {}
         buttons_constraints_active = self.timer == 0
         if not self.is_constrained or not buttons_constraints_active:

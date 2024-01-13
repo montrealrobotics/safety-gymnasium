@@ -13,7 +13,10 @@
 # limitations under the License.
 # ==============================================================================
 """Push level 2."""
-
+from safety_gymnasium.assets.geoms import Hazards, Pillars
+from safety_gymnasium.assets.mocaps import Gremlins
+from safety_gymnasium.assets.free_geoms import Vases, PushBox
+from safety_gymnasium.assets.geoms import Buttons, Goal
 from safety_gymnasium.tasks.safe_navigation.push.push_level1 import PushLevel1
 
 
@@ -22,10 +25,10 @@ class PushLevel2(PushLevel1):
 
     def __init__(self, config, reward_goal, reward_distance) -> None:
         super().__init__(config=config, reward_goal=reward_goal, reward_distance=reward_distance)
-        # pylint: disable=no-member
 
-        self.placements_conf.extents = [-2, -2, 2, 2]
-
-        self.hazards.num = 4
-        self.pillars.num = 4
-        self.pillars.is_constrained = True
+        self.placements_conf.extents = [-1.8, -1.8, 1.8, 1.8]
+        self._add_geoms(Hazards(num=4, keepout=0.18))
+        self._add_mocaps(Gremlins(num=4, travel=0.35, keepout=0.4))
+        self._add_free_geoms(Vases(num=1, is_constrained=False))
+        self._add_geoms(Pillars(num=1, is_constrained=False))
+        self._add_geoms(Buttons(num=4, is_constrained=True,))

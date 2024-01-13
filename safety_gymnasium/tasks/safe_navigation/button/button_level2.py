@@ -13,7 +13,9 @@
 # limitations under the License.
 # ==============================================================================
 """Button task 2."""
-
+from safety_gymnasium.assets.geoms import Hazards, Pillars
+from safety_gymnasium.assets.mocaps import Gremlins
+from safety_gymnasium.assets.free_geoms import Vases, PushBox
 from safety_gymnasium.tasks.safe_navigation.button.button_level1 import ButtonLevel1
 
 
@@ -25,8 +27,12 @@ class ButtonLevel2(ButtonLevel1):
 
     def __init__(self, config, reward_goal=1., reward_distance=1.) -> None:
         super().__init__(config=config, reward_goal=reward_goal, reward_distance=reward_distance)
-        # pylint: disable=no-member
+
         self.placements_conf.extents = [-1.8, -1.8, 1.8, 1.8]
 
-        self.hazards.num = 8
-        self.gremlins.num = 6
+        self._add_geoms(Hazards(num=4, keepout=0.18))
+        self._add_mocaps(Gremlins(num=4, travel=0.35, keepout=0.4))
+        self._add_free_geoms(Vases(num=1, is_constrained=False))
+        self._add_geoms(Pillars(num=1, is_constrained=False))
+        self._add_free_geoms(PushBox(null_dist=0))
+        self.buttons.is_constrained = True  # pylint: disable=no-member

@@ -14,8 +14,11 @@
 # ==============================================================================
 """Goal level 1."""
 
-from safety_gymnasium.assets.free_geoms import Vases
-from safety_gymnasium.assets.geoms import Hazards
+from safety_gymnasium.assets.geoms import Hazards, Pillars
+from safety_gymnasium.assets.mocaps import Gremlins
+from safety_gymnasium.assets.free_geoms import Vases, PushBox
+from safety_gymnasium.assets.geoms import Buttons, Goal
+
 from safety_gymnasium.tasks.safe_navigation.goal.goal_level0 import GoalLevel0
 
 
@@ -29,6 +32,10 @@ class GoalLevel1(GoalLevel0):
         super().__init__(config=config, reward_goal=reward_goal, reward_distance=reward_distance)
 
         self.placements_conf.extents = [-1.5, -1.5, 1.5, 1.5]
+        self._add_geoms(Buttons(num=4, is_constrained=True,))
 
-        self._add_geoms(Hazards(num=8, keepout=0.18))
+        self._add_geoms(Hazards(num=4, keepout=0.18))
+        # self._add_mocaps(Gremlins(num=2, travel=0.35, keepout=0.4))
         self._add_free_geoms(Vases(num=1, is_constrained=False))
+        self._add_geoms(Pillars(num=1, is_constrained=False))
+        self._add_free_geoms(PushBox(null_dist=0))
