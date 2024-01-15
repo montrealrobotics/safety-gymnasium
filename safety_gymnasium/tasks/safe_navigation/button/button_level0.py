@@ -28,7 +28,7 @@ from safety_gymnasium.bases.base_task import BaseTask
 class ButtonLevel0(BaseTask):
     """An agent must press a goal button."""
 
-    def __init__(self, config, reward_goal=1., reward_distance=1.) -> None:
+    def __init__(self, config, reward_goal=1., reward_distance=1., num_steps=1000, action_noise=0.0) -> None:
         super().__init__(config=config)
         self._add_geoms(Buttons(num=4, is_constrained=False, reward_goal=reward_goal, reward_distance=reward_distance))
 

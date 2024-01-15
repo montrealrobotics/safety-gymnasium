@@ -315,7 +315,7 @@ class BaseAgent(abc.ABC):  # pylint: disable=too-many-instance-attributes
 
         self.engine.data.ctrl[:] = np.clip(action, action_range[:, 0], action_range[:, 1])
 
-        if noise:
+        if noise is not None:
             self.engine.data.ctrl[:] += noise
 
     def build_sensor_observation_space(self) -> gymnasium.spaces.Dict:
