@@ -50,7 +50,10 @@ class SafetyHopperVelocityEnv(HopperEnv):
         }
 
         cost = float(x_velocity > self._velocity_threshold)
-
+        if cost > 0:
+            terminated = True
+        
+        info["cost"] = cost
         if self.mujoco_renderer.viewer:
             clear_viewer(self.mujoco_renderer.viewer)
             add_velocity_marker(
@@ -62,4 +65,4 @@ class SafetyHopperVelocityEnv(HopperEnv):
             )
         if self.render_mode == 'human':
             self.render()
-        return observation, reward, cost, terminated, False, info
+        return observation, reward, terminated, False, info

@@ -50,7 +50,10 @@ class SafetyWalker2dVelocityEnv(Walker2dEnv):
         }
 
         cost = float(x_velocity > self._velocity_threshold)
+        if cost > 0:
+            terminated = True
 
+        info["cost"] = cost
         if self.mujoco_renderer.viewer:
             clear_viewer(self.mujoco_renderer.viewer)
             add_velocity_marker(

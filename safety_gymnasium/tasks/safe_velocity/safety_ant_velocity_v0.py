@@ -65,7 +65,9 @@ class SafetyAntVelocityEnv(AntEnv):
 
         velocity = np.sqrt(x_velocity**2 + y_velocity**2)
         cost = float(velocity > self._velocity_threshold)
-
+        if cost > 0:
+            terminated = True
+        info["cost"] = cost
         if self.mujoco_renderer.viewer:
             clear_viewer(self.mujoco_renderer.viewer)
             add_velocity_marker(

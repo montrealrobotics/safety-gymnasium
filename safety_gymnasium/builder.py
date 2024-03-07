@@ -99,7 +99,7 @@ class Builder(gymnasium.Env, gymnasium.utils.EzPickle):
         height: int = 256,
         camera_id: int | None = None,
         camera_name: str | None = None,
-        early_termination: bool = False,
+        early_termination: bool = True,
         term_cost: int = 1,
         failure_penalty: float = 0.0,
         reward_goal: float = 1.0,
