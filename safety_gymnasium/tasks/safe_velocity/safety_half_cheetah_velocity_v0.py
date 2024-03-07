@@ -51,7 +51,7 @@ class SafetyHalfCheetahVelocityEnv(HalfCheetahEnv):
 
         if cost > 0:
             terminated = True
-        info["cost"] = cost
+        info["cost"] = cost or terminated
         if self.mujoco_renderer.viewer:
             clear_viewer(self.mujoco_renderer.viewer)
             add_velocity_marker(
@@ -63,4 +63,4 @@ class SafetyHalfCheetahVelocityEnv(HalfCheetahEnv):
             )
         if self.render_mode == 'human':
             self.render()
-        return observation, reward, cost, terminated, False, info
+        return observation, reward, terminated, False, info

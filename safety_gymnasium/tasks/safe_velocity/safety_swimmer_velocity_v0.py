@@ -69,4 +69,4 @@ class SafetySwimmerVelocityEnv(SwimmerEnv):
             )
         if self.render_mode == 'human':
             self.render()
-        return observation, reward, cost, False, False, info
+        return observation, reward, False, False, info

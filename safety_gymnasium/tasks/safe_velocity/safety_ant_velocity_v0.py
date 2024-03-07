@@ -79,4 +79,4 @@ class SafetyAntVelocityEnv(AntEnv):
             )
         if self.render_mode == 'human':
             self.render()
-        return observation, reward, cost, terminated, False, info
+        return observation, reward, terminated, False, info
