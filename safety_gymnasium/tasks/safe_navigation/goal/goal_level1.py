@@ -25,8 +25,8 @@ class GoalLevel1(GoalLevel0):
     One vase is present in the scene, but the agent is not penalized for hitting it.
     """
 
-    def __init__(self, config, reward_goal=1., reward_distance=1.) -> None:
-        super().__init__(config=config, reward_goal=reward_goal, reward_distance=reward_distance)
+    def __init__(self, config, reward_goal=1., reward_distance=1., num_steps=1000, action_noise=0.0) -> None:
+        super().__init__(config=config, reward_goal=reward_goal, reward_distance=reward_distance, num_steps=num_steps, action_noise=action_noise)
 
         self.placements_conf.extents = [-1.5, -1.5, 1.5, 1.5]
 

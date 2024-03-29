@@ -169,16 +169,16 @@ class BaseTask(Underlying):  # pylint: disable=too-many-instance-attributes,too-
       and it is implemented in different task.
     """
 
-    def __init__(self, config: dict, reward_goal=1., reward_distance=1.) -> None:  # pylint: disable-next=too-many-statements
+    def __init__(self, config: dict, reward_goal=1., reward_distance=1., num_steps=1000, action_noise=0.) -> None:  # pylint: disable-next=too-many-statements
         """Initialize the task.
 
         Args:
             config (dict): Configuration dictionary, used to pre-config some attributes
               according to tasks via :meth:`safety_gymnasium.register`.
         """
-        super().__init__(config=config, reward_goal=reward_goal)
+        super().__init__(config=config, reward_goal=reward_goal, action_noise=action_noise)
 
-        self.num_steps = 1000  # Maximum number of environment steps in an episode
+        self.num_steps = num_steps  # Maximum number of environment steps in an episode
 
         self.lidar_conf = LidarConf()
         self.compass_conf = CompassConf()

@@ -104,6 +104,8 @@ class Builder(gymnasium.Env, gymnasium.utils.EzPickle):
         failure_penalty: float = 0.0,
         reward_goal: float = 1.0,
         reward_distance: float = 1.0,
+        num_steps: int = 1000,
+        action_noise: float = 0.0,
     ) -> None:
         """Initialize the builder.
 
@@ -132,7 +134,7 @@ class Builder(gymnasium.Env, gymnasium.utils.EzPickle):
         self.task_id: str = task_id
         self.config: dict = config
         self._seed: int = None
-        self._setup_simulation(reward_goal=reward_goal, reward_distance=reward_distance)
+        self._setup_simulation(reward_goal=reward_goal, reward_distance=reward_distance, num_steps=num_steps, action_noise=action_noise)
 
         self.first_reset: bool = None
         self.steps: int = None
@@ -150,18 +152,19 @@ class Builder(gymnasium.Env, gymnasium.utils.EzPickle):
 
         self.render_parameters = RenderConf(render_mode, width, height, camera_id, camera_name)
 
-    def _setup_simulation(self, reward_goal, reward_distance) -> None:
+    def _setup_simulation(self, reward_goal, reward_distance, num_steps, action_noise) -> None:
         """Set up mujoco the simulation instance."""
-        self.task = self._get_task(reward_goal, reward_distance)
+        self.task = self._get_task(reward_goal, reward_distance, num_steps, action_noise)
         # self.task.reward_goal = self.reward_goal
         self.set_seed()
 
-    def _get_task(self, reward_goal, reward_distance) -> BaseTask:
+
+    def _get_task(self, reward_goal, reward_distance, num_steps, action_noise) -> BaseTask:
         """Instantiate a task object."""
         class_name = get_task_class_name(self.task_id)
         assert hasattr(tasks, class_name), f'Task={class_name} not implemented.'
         task_class = getattr(tasks, class_name)
-        task = task_class(config=self.config, reward_goal=reward_goal, reward_distance=reward_distance)
+        task = task_class(config=self.config, reward_goal=reward_goal, reward_distance=reward_distance, num_steps=num_steps, action_noise=action_noise)
 
         task.build_observation_space()
         return task

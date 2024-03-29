@@ -187,7 +187,7 @@ class Underlying(abc.ABC):  # pylint: disable=too-many-instance-attributes
     - :attr:`_obstacles` (list): All types of object in current environment.
     """
 
-    def __init__(self, config: dict | None = None, reward_goal=1.0, reward_distance=1.) -> None:
+    def __init__(self, config: dict | None = None, reward_goal=1.0, reward_distance=1., action_noise=0.) -> None:
         """Initialize the engine.
 
         Args:
@@ -223,7 +223,7 @@ class Underlying(abc.ABC):  # pylint: disable=too-many-instance-attributes
         self._parse(config)
         self.agent = None
         self.action_noise: float = (
-            0.0  # Magnitude of independent per-component gaussian action noise
+            action_noise  # Magnitude of independent per-component gaussian action noise
         )
         self._build_agent(self.agent_name)
 
