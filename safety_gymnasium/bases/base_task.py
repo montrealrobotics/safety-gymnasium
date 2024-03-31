@@ -106,7 +106,7 @@ class MechanismConf:
     """
 
     randomize_layout: bool = True
-    continue_goal: bool = True
+    continue_goal: bool = False
     terminate_resample_failure: bool = True
 
 
