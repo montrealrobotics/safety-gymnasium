@@ -24,8 +24,8 @@ from safety_gymnasium.bases.base_task import BaseTask
 class PushLevel0(BaseTask):
     """An agent must push a box to a goal."""
 
-    def __init__(self, config, reward_goal, reward_distance) -> None:
-        super().__init__(config=config, reward_goal=reward_goal, reward_distance=reward_distance)
+    def __init__(self, config, reward_goal=1., reward_distance=1., num_steps=1000, action_noise=0.0) -> None:
+        super().__init__(config=config, reward_goal=reward_goal, reward_distance=reward_distance, num_steps=num_steps, action_noise=action_noise)
 
         self.placements_conf.extents = [-1, -1, 1, 1]
 
