@@ -134,6 +134,7 @@ class Builder(gymnasium.Env, gymnasium.utils.EzPickle):
         self.cost: float = None
         self.terminated: bool = True
         self.truncated: bool = False
+        self.cost_bin = 0
 
         self.render_parameters = RenderConf(render_mode, width, height, camera_id, camera_name)
 
@@ -175,7 +176,7 @@ class Builder(gymnasium.Env, gymnasium.utils.EzPickle):
         self.terminated = False
         self.truncated = False
         self.steps = 0  # Count of steps taken in this episode
-
+        self.cost_bin = 0
         self.task.reset()
         self.task.specific_reset()
         self.task.update_world()  # refresh specific settings
@@ -210,8 +211,12 @@ class Builder(gymnasium.Env, gymnasium.utils.EzPickle):
 
             # Constraint violations
             info.update(self._cost())
-
             cost = info['cost_sum']
+            if self.cost_bin == 1:
+                cost = 0 
+
+            if cost > 0:
+                self.cost_bin = 1 
 
             self.task.specific_step()
 
