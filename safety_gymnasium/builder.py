@@ -99,6 +99,7 @@ class Builder(gymnasium.Env, gymnasium.utils.EzPickle):
         height: int = 256,
         camera_id: int | None = None,
         camera_name: str | None = None,
+        task_seed: int | None = None,
     ) -> None:
         """Initialize the builder.
 
@@ -134,6 +135,7 @@ class Builder(gymnasium.Env, gymnasium.utils.EzPickle):
         self.cost: float = None
         self.terminated: bool = True
         self.truncated: bool = False
+        self.task_seed = task_seed 
 
         self.render_parameters = RenderConf(render_mode, width, height, camera_id, camera_name)
 
@@ -168,7 +170,10 @@ class Builder(gymnasium.Env, gymnasium.utils.EzPickle):
 
         if not self.task.mechanism_conf.randomize_layout:
             assert seed is None, 'Cannot set seed if randomize_layout=False'
-            self.set_seed(0)
+            if self.task_seed is not None:
+                self.set_seed(self.task_seed)
+            else:
+                self.set_seed(0)
         elif seed is not None:
             self.set_seed(seed)
 

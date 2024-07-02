@@ -218,7 +218,7 @@ class Underlying(abc.ABC):  # pylint: disable=too-many-instance-attributes
         self.agent_name = None
         self.observe_vision = False  # Observe vision from the agent
         self.debug = False
-        self.observation_flatten = True  # Flatten observation into a vector
+        self.observation_flatten = False  # Flatten observation into a vector
         self._parse(config)
         self.agent = None
         self.action_noise: float = (
@@ -536,7 +536,7 @@ class Underlying(abc.ABC):  # pylint: disable=too-many-instance-attributes
         # Add indicator for nonzero cost
         if cost.get('cost_sum', 0) > 0:
             self._render_sphere(self.agent.pos, 0.25, COLOR['red'], alpha=0.5)
-
+        print(mode)
         # Draw vision pixels
         if mode in {'rgb_array', 'depth_array'}:
             # Extract depth part of the read_pixels() tuple

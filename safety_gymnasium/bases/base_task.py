@@ -105,8 +105,8 @@ class MechanismConf:
         otherwise, raise a python exception.
     """
 
-    randomize_layout: bool = True
-    continue_goal: bool = True
+    randomize_layout: bool = False
+    continue_goal: bool = False
     terminate_resample_failure: bool = True
 
 
