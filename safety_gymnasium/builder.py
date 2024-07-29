@@ -44,8 +44,8 @@ class RenderConf:
     """
 
     mode: str = None
-    width: int = 256
-    height: int = 256
+    width: int = 64
+    height: int = 64
     camera_id: int = None
     camera_name: str = None
 

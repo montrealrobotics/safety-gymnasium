@@ -101,7 +101,7 @@ class VisionEnvConf:
         vision_size (tuple): Size (width, height) of vision observation.
     """
 
-    vision_size = (256, 256)
+    vision_size = (64, 64)
 
 
 @dataclass
@@ -216,9 +216,9 @@ class Underlying(abc.ABC):  # pylint: disable=too-many-instance-attributes
 
         # something are parsed from pre-defined configs
         self.agent_name = None
-        self.observe_vision = False  # Observe vision from the agent
+        self.observe_vision = True  # Observe vision from the agent
         self.debug = False
-        self.observation_flatten = True  # Flatten observation into a vector
+        self.observation_flatten = False  # Flatten observation into a vector
         self._parse(config)
         self.agent = None
         self.action_noise: float = (
@@ -518,7 +518,7 @@ class Underlying(abc.ABC):  # pylint: disable=too-many-instance-attributes
         self.viewer.vopt.geomgroup[:] = 1
 
         # Lidar and Compass markers
-        if self.render_conf.lidar_markers:
+        if False: #self.render_conf.lidar_markers:
             offset = (
                 self.render_conf.lidar_offset_init
             )  # Height offset for successive lidar indicators
