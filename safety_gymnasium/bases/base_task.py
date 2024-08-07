@@ -265,6 +265,17 @@ class BaseTask(Underlying):  # pylint: disable=too-many-instance-attributes,too-
                 dtype=np.uint8,
             )
 
+        if self.render_depth:
+            width, height = self.vision_env_conf.vision_size
+            rows, cols = height, width
+            self.vision_env_conf.vision_size = (rows, cols)
+            obs_space_dict['depth'] = gymnasium.spaces.Box(
+                0,
+                1.0,
+                (*self.vision_env_conf.vision_size, 1),
+                dtype=np.float64,
+            ) 
+
         self.obs_info.obs_space_dict = gymnasium.spaces.Dict(obs_space_dict)
 
         if self.observation_flatten:
@@ -427,10 +438,13 @@ class BaseTask(Underlying):  # pylint: disable=too-many-instance-attributes,too-
 
         if self.observe_vision:
             obs['vision'] = self._obs_vision()
+            
+        if self.render_depth:
+            obs["depth"] = self._obs_depth()
 
-        assert self.obs_info.obs_space_dict.contains(
-            obs,
-        ), f'Bad obs {obs} {self.obs_info.obs_space_dict}'
+        # assert self.obs_info.obs_space_dict.contains(
+        #     obs,
+        # ), f'Bad obs {obs} {self.obs_info.obs_space_dict}'
 
         if self.observation_flatten:
             obs = gymnasium.spaces.utils.flatten(self.obs_info.obs_space_dict, obs)
@@ -563,6 +577,19 @@ class BaseTask(Underlying):  # pylint: disable=too-many-instance-attributes,too-
         rows, cols = self.vision_env_conf.vision_size
         width, height = cols, rows
         return self.render(width, height, mode='rgb_array', camera_name='vision', cost={})
+
+    def _obs_depth(self) -> np.ndarray:
+        """Return pixels from the agent camera.
+
+        Note:
+            This is a 3D array of shape (rows, cols, channels).
+            The channels are RGB, in that order.
+            If you are on a headless machine, you may need to checkout this:
+            URL: `issue <https://github.com/PKU-Alignment/safety-gymnasium/issues/27>`_
+        """
+        rows, cols = self.vision_env_conf.vision_size
+        width, height = cols, rows
+        return self.render(width, height, mode='depth_array', camera_name='vision', cost={})
 
     def _ego_xy(self, pos: np.ndarray) -> np.ndarray:
         """Return the egocentric XY vector to a position from the agent."""

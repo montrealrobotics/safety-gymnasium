@@ -219,10 +219,11 @@ class Underlying(abc.ABC):  # pylint: disable=too-many-instance-attributes
 
         # something are parsed from pre-defined configs
         self.agent_name = None
-        self.observe_vision = False  # Observe vision from the agent
+        self.observe_vision = True  # Observe vision from the agent
         self.debug = False
-        self.observation_flatten = True  # Flatten observation into a vector
+        self.observation_flatten = False  # Flatten observation into a vector
         self.agent = None
+        self.render_depth = True
         self.action_noise: float = (
             0.0  # Magnitude of independent per-component gaussian action noise
         )
